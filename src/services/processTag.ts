@@ -1,5 +1,7 @@
 import * as FileSystem from 'expo-file-system/legacy';
 
+import { parseTagHeuristic } from '@/src/services/parseTag';
+
 const fnUrl = () => {
   const base = process.env.EXPO_PUBLIC_SUPABASE_URL?.replace(/\/$/, '');
   return base ? `${base}/functions/v1/process-tag` : '';
@@ -33,7 +35,7 @@ export async function processTagImage(
   }
 
   const base64 = await FileSystem.readAsStringAsync(imageUri, {
-    encoding: 'base64',
+    encoding: FileSystem.EncodingType.Base64,
   });
 
   const res = await fetch(url, {
@@ -64,7 +66,6 @@ export async function processTagImage(
 
 /** Local / offline: skip Edge Function, use heuristic on placeholder text */
 export async function processTagLocalFallback(rawText: string) {
-  const { parseTagHeuristic } = await import('@/src/services/parseTag');
   const parsed = parseTagHeuristic(rawText);
   return {
     ok: true as const,
