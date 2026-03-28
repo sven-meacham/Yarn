@@ -1,0 +1,86 @@
+import { createClient } from '@supabase/supabase-js';
+
+import { normalizeMaterialKey } from '@/src/utils/materials';
+
+const url = process.env.EXPO_PUBLIC_SUPABASE_URL;
+const anon = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY;
+
+if (!url || !anon) {
+  console.warn(
+    'YARN: Missing EXPO_PUBLIC_SUPABASE_URL or EXPO_PUBLIC_SUPABASE_ANON_KEY. Add them to .env',
+  );
+}
+
+export const supabase = createClient(url ?? '', anon ?? '');
+
+export type BrandRow = {
+  id: string;
+  name: string;
+  ethics_score: number;
+  sustainability_score: number;
+  transparency_score: number;
+  overall_brand_score: number;
+  notes: string | null;
+};
+
+export type MaterialRow = {
+  id: string;
+  name: string;
+  sustainability_score: number;
+  quality_score: number;
+  health_note: string | null;
+  sustainability_note: string | null;
+  score_adjustment: number | null;
+};
+
+export type CountryRow = {
+  id: string;
+  name: string;
+  manufacturing_risk_score: number;
+  note: string | null;
+};
+
+export async function fetchBrandByName(name: string): Promise<BrandRow | null> {
+  const normalized = name.trim().toLowerCase();
+  if (!normalized) return null;
+  const { data, error } = await supabase
+    .from('brands')
+    .select('*')
+    .eq('name', normalized)
+    .maybeSingle();
+  if (error) {
+    console.warn('fetchBrandByName', error.message);
+    return null;
+  }
+  return data as BrandRow | null;
+}
+
+export async function fetchMaterialByName(name: string): Promise<MaterialRow | null> {
+  const normalized = normalizeMaterialKey(name);
+  if (!normalized) return null;
+  const { data, error } = await supabase
+    .from('materials')
+    .select('*')
+    .eq('name', normalized)
+    .maybeSingle();
+  if (error) {
+    console.warn('fetchMaterialByName', error.message);
+    return null;
+  }
+  return data as MaterialRow | null;
+}
+
+export async function fetchCountryByName(name: string): Promise<CountryRow | null> {
+  const q = name.trim();
+  if (!q) return null;
+  const { data, error } = await supabase
+    .from('countries')
+    .select('*')
+    .ilike('name', q)
+    .maybeSingle();
+  if (error) {
+    console.warn('fetchCountryByName', error.message);
+    return null;
+  }
+  return data as CountryRow | null;
+}
