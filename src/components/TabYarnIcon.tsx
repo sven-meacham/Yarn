@@ -4,14 +4,16 @@ import { YarnBallGraphic } from '@/src/components/YarnBallGraphic';
 
 type Props = {
   size?: number;
+  /** When true, thicker rim so Scan matches other tabs’ “active” look. */
+  focused?: boolean;
 };
 
-/** Small yarn-ball tab icon (original thinner rim). */
-export function TabYarnIcon({ size = 26 }: Props) {
+/** Small yarn-ball tab icon — rim thickens when this tab is selected. */
+export function TabYarnIcon({ size = 26, focused }: Props) {
   const s = size;
   return (
     <View style={[styles.wrap, { width: s + 8, height: s + 8 }]}>
-      <YarnBallGraphic size={s} />
+      <YarnBallGraphic size={s} emphasized={!!focused} />
     </View>
   );
 }
