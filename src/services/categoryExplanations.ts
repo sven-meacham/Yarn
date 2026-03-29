@@ -37,7 +37,12 @@ function missingMaterials(materials: ParsedMaterial[]): boolean {
   return false;
 }
 
-type Scores = { brandScore: number; materialScore: number; countryScore: number };
+type Scores = {
+  brandScore: number;
+  materialScore: number;
+  materialQualityScore: number;
+  countryScore: number;
+};
 
 /**
  * Explicit copy for the results screen: pulls Supabase notes when present,
@@ -49,16 +54,17 @@ export async function buildCategoryExplanations(
 ): Promise<{ brand: string; materials: string; country: string }> {
   const [brandText, materialsText, countryText] = await Promise.all([
     explainBrand(parsed, scores.brandScore),
-    explainMaterials(parsed, scores.materialScore),
+    explainMaterials(parsed, scores.materialScore, scores.materialQualityScore),
     explainCountry(parsed, scores.countryScore),
   ]);
   return { brand: brandText, materials: materialsText, country: countryText };
 }
 
+/** Brand practices = company ethics / sustainability / transparency from the library (not “reputation” alone). */
 async function explainBrand(parsed: ParsedTag, brandScore: number): Promise<string> {
   if (isUnknownBrand(parsed.brand)) {
     return (
-      '**No brand on the tag.** We cannot judge company-level sustainability yet. The brand line uses a neutral default score (50/100) until you add the brand name.'
+      '**No brand on the tag.** The **brand practices** component uses a neutral default (50/100) until you add the brand name. It measures published ethics, sustainability, and transparency signals in our library—not popularity.'
     );
   }
 
@@ -68,30 +74,32 @@ async function explainBrand(parsed: ParsedTag, brandScore: number): Promise<stri
   if (!row) {
     return (
       `**${label}** is not in our curated brand list yet. ` +
-        `Your score (${brandScore}/100) uses a neutral default until we add research-backed ethics, sustainability, and transparency data in Supabase. ` +
-        `Add this brand in the database with a short **notes** field to unlock a real assessment.`
+        `Your **brand practices** component (${brandScore}/100) uses a neutral default until we add **${label}** in Supabase with ethics, sustainability, and transparency scores plus notes.`
     );
   }
 
   const parts: string[] = [];
   parts.push(
-    `**Overall brand score: ${row.overall_brand_score}/100** (ethics ${row.ethics_score}, sustainability ${row.sustainability_score}, transparency ${row.transparency_score}).`,
+    `**Brand practices component: ${brandScore}/100** — from our library’s overall brand index (**${row.overall_brand_score}/100**; ethics ${row.ethics_score}, sustainability ${row.sustainability_score}, transparency ${row.transparency_score}). This is blended into the headline score (it is **not** a popularity or marketing score).`,
   );
   if (row.notes?.trim()) {
     parts.push(row.notes.trim());
   } else {
     parts.push(
-      'We have numeric sub-scores but no long-form note yet—add a **notes** field for this brand in Supabase to explain how you judge them.',
+      'No long-form brand note in the database yet—add a **notes** field in Supabase to explain how you judge this label’s practices.',
     );
   }
-  parts.push(`This scan’s brand component is **${brandScore}/100** after blending with the rest of the item.`);
   return parts.join('\n\n');
 }
 
-async function explainMaterials(parsed: ParsedTag, materialScore: number): Promise<string> {
+async function explainMaterials(
+  parsed: ParsedTag,
+  materialScore: number,
+  materialQualityScore: number,
+): Promise<string> {
   if (missingMaterials(parsed.materials)) {
     return (
-      '**No usable fiber list on the tag.** The materials score uses a neutral default (50/100). Add materials (e.g. “60% cotton / 40% polyester”) so we can weight each fiber and show health and sustainability notes.'
+      '**No usable fiber list on the tag.** Sustainability and quality components use a neutral default (50/100) until you add materials (e.g. “60% cotton / 40% polyester”) so we can weight each fiber.'
     );
   }
 
@@ -137,7 +145,9 @@ async function explainMaterials(parsed: ParsedTag, materialScore: number): Promi
     );
   }
 
-  lines.push(`\n**Materials component for this item: ${materialScore}/100.**`);
+  lines.push(
+    `\n**Material side of the score:** fiber **sustainability** ${materialScore}/100 (environmental impact of the blend) and fiber **quality** ${materialQualityScore}/100 (durability / hand-feel in the library). Together with **place of manufacture** and **brand practices**, these feed the headline (fiber sustainability is weighted highest).`,
+  );
   return lines.join('\n');
 }
 

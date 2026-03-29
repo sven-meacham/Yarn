@@ -25,6 +25,7 @@ export const useScanStore = create<ScanState>((set, get) => ({
         parsed,
         brandScore: scores.brandScore,
         materialScore: scores.materialScore,
+        materialQualityScore: scores.materialQualityScore,
         countryScore: scores.countryScore,
         overallScore: scores.overallScore,
         countryNote: scores.countryNote,

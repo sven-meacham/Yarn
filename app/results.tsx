@@ -3,20 +3,24 @@ import { useEffect, useState } from 'react';
 import { Image, StyleSheet, Text, View } from 'react-native';
 
 import { AddDetailsModal } from '@/src/components/AddDetailsModal';
-import { CategoryBreakdownRow } from '@/src/components/CategoryBreakdownRow';
+import { ExpandableCategoryScore } from '@/src/components/ExpandableCategoryScore';
 import { ExplanationCard } from '@/src/components/ExplanationCard';
 import { PrimaryButton } from '@/src/components/PrimaryButton';
 import { Screen } from '@/src/components/Screen';
 import { useScanStore } from '@/src/store/useScanStore';
 import { colors, spacing } from '@/src/theme/tokens';
+import { flagEmojiForCountry } from '@/src/utils/countryFlags';
 import { mergeUserDetails, type UserDetailFields } from '@/src/utils/mergeUserDetails';
 import { dotColor, scoreLabel } from '@/src/utils/tagFields';
+
+type OpenSection = null | 'brand' | 'materials' | 'country';
 
 export default function ResultsScreen() {
   const router = useRouter();
   const result = useScanStore((s) => s.result);
   const updateParsedAndRescore = useScanStore((s) => s.updateParsedAndRescore);
   const [detailsOpen, setDetailsOpen] = useState(false);
+  const [openSection, setOpenSection] = useState<OpenSection>(null);
 
   useEffect(() => {
     if (!result) {
@@ -30,14 +34,19 @@ export default function ResultsScreen() {
     await updateParsedAndRescore(merged);
   }
 
+  function toggle(section: Exclude<OpenSection, null>) {
+    setOpenSection((cur) => (cur === section ? null : section));
+  }
+
   if (!result) {
     return null;
   }
 
   const {
     overallScore,
-    brandScore,
+    brandScore: brandFromResult,
     materialScore,
+    materialQualityScore: mqFromResult,
     countryScore,
     explanation,
     parsed,
@@ -46,6 +55,9 @@ export default function ResultsScreen() {
     missingFields,
     categoryExplanations,
   } = result;
+
+  const materialQualityScore = mqFromResult ?? materialScore;
+  const brandScore = brandFromResult ?? 50;
 
   const overallTint = dotColor(overallScore);
   const label = scoreLabel(overallScore);
@@ -56,15 +68,22 @@ export default function ResultsScreen() {
     .map((m) => `${Math.round(m.percent)}% ${m.name}`)
     .join(' · ');
 
+  const brandHeadline =
+    parsed.brand && parsed.brand.toLowerCase() !== 'unknown' ? parsed.brand : '—';
+  const matHeadline = missingFields.materials ? '—' : matSummary || 'No fibers listed.';
+  const countryKnown =
+    parsed.country && parsed.country.toLowerCase() !== 'unknown' && parsed.country.trim() !== '';
+  const countryHeadline = countryKnown ? parsed.country : '—';
+
   const brandSubtitle = missingFields.brand
     ? 'Not on tag — neutral default.'
     : 'From care label.';
   const matSubtitle = missingFields.materials
     ? 'Not detected — neutral default.'
-    : matSummary || 'No fibers listed.';
+    : `${matSummary || 'No fibers listed.'} · Library: sustainability + fiber quality`;
   const countrySubtitle = missingFields.country
     ? 'Not detected — neutral default.'
-    : parsed.country && parsed.country.toLowerCase() !== 'unknown'
+    : countryKnown
       ? `Made in ${parsed.country}.`
       : 'Origin unclear.';
 
@@ -99,63 +118,63 @@ export default function ResultsScreen() {
             <Text style={[styles.scoreLabel, { color: overallTint }]}>{label}</Text>
           </View>
         </View>
-        <Text style={styles.scoreHint}>Weighted: brand 50% · materials 35% · country 15%</Text>
+        <Text style={styles.scoreHint}>
+          Weighted: fiber sustainability 35% · place of manufacture 25% · brand practices 25% · fiber
+          quality 15%
+        </Text>
       </View>
 
       <Text style={styles.sectionHead}>Scores</Text>
       <View style={styles.listCard}>
-        <CategoryBreakdownRow
+        <ExpandableCategoryScore
           icon="pricetag-outline"
-          title="Brand"
+          title="Brand practices"
+          headline={brandHeadline}
           subtitle={brandSubtitle}
-          valueRight={parsed.brand && parsed.brand.toLowerCase() !== 'unknown' ? parsed.brand : '—'}
           score={brandScore}
+          accent={colors.explainerBrand}
+          background={colors.explainerBrandBg}
+          explanationBody={categoryExplanations.brand}
+          expanded={openSection === 'brand'}
+          onToggle={() => toggle('brand')}
           showAddDetails={!!missingFields.brand}
           onAddDetails={() => setDetailsOpen(true)}
         />
-        <CategoryBreakdownRow
+        <ExpandableCategoryScore
           icon="shirt-outline"
           title="Materials"
+          headline={matHeadline}
           subtitle={matSubtitle}
-          valueRight={
-            missingFields.materials ? '—' : matSummary.length > 28 ? `${matSummary.slice(0, 28)}…` : matSummary
-          }
           score={materialScore}
+          secondaryScore={{
+            label: 'Fiber quality',
+            value: materialQualityScore,
+          }}
+          accent={colors.explainerMaterials}
+          background={colors.explainerMaterialsBg}
+          explanationBody={categoryExplanations.materials}
+          expanded={openSection === 'materials'}
+          onToggle={() => toggle('materials')}
           showAddDetails={!!missingFields.materials}
           onAddDetails={() => setDetailsOpen(true)}
         />
-        <CategoryBreakdownRow
+        <ExpandableCategoryScore
           icon="earth-outline"
           title="Place of manufacturing"
+          headline={countryHeadline}
+          headlineExtra={countryKnown ? flagEmojiForCountry(parsed.country) : undefined}
           subtitle={countrySubtitle}
-          valueRight={
-            parsed.country && parsed.country.toLowerCase() !== 'unknown' ? parsed.country : '—'
-          }
           score={countryScore}
+          accent={colors.explainerCountry}
+          background={colors.explainerCountryBg}
+          explanationBody={categoryExplanations.country}
+          expanded={openSection === 'country'}
+          onToggle={() => toggle('country')}
           showAddDetails={!!missingFields.country}
           onAddDetails={() => setDetailsOpen(true)}
+          isLast
         />
       </View>
-
-      <Text style={styles.sectionHead}>What this means</Text>
-      <ExplanationCard
-        title="Brand"
-        body={categoryExplanations.brand}
-        accent={colors.explainerBrand}
-        background={colors.explainerBrandBg}
-      />
-      <ExplanationCard
-        title="Materials"
-        body={categoryExplanations.materials}
-        accent={colors.explainerMaterials}
-        background={colors.explainerMaterialsBg}
-      />
-      <ExplanationCard
-        title="Place of manufacturing"
-        body={categoryExplanations.country}
-        accent={colors.explainerCountry}
-        background={colors.explainerCountryBg}
-      />
 
       <ExplanationCard
         title="Tag read (AI / OCR)"

@@ -81,6 +81,7 @@ Made in Vietnam`;
           explanation: pipeline.explanation,
           brandScore: scores.brandScore,
           materialScore: scores.materialScore,
+          materialQualityScore: scores.materialQualityScore,
           countryScore: scores.countryScore,
           overallScore: scores.overallScore,
           countryNote: scores.countryNote,

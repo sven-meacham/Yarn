@@ -10,13 +10,22 @@ export const COUNTRY_SCORE_FROM_RISK = (risk: number) =>
 
 const DEFAULT_COMPONENT = 50;
 
-const WEIGHT_BRAND = 0.5;
-const WEIGHT_MATERIAL = 0.35;
-const WEIGHT_COUNTRY = 0.15;
+/**
+ * Brand = **brand practices** (ethics / sustainability / transparency index in the library), not “reputation” alone.
+ * Order of emphasis: environmental fiber impact first, then place + company practices, then fiber quality.
+ */
+const WEIGHT_MATERIAL_SUSTAINABILITY = 0.35;
+const WEIGHT_COUNTRY = 0.25;
+const WEIGHT_BRAND_PRACTICES = 0.25;
+const WEIGHT_MATERIAL_QUALITY = 0.15;
 
-function materialBaseScore(row: MaterialRow): number {
+function materialSustainabilityBase(row: MaterialRow): number {
   const adj = row.score_adjustment ?? 0;
   return Math.max(0, Math.min(100, row.sustainability_score + adj));
+}
+
+function materialQualityBase(row: MaterialRow): number {
+  return Math.max(0, Math.min(100, row.quality_score));
 }
 
 export async function computeMaterialScore(materials: ParsedMaterial[]): Promise<number> {
@@ -43,13 +52,46 @@ export async function computeMaterialScore(materials: ParsedMaterial[]): Promise
   let weighted = 0;
   for (const m of normalized) {
     const row = await fetchMaterialByName(m.name);
-    const base = row ? materialBaseScore(row) : DEFAULT_COMPONENT;
+    const base = row ? materialSustainabilityBase(row) : DEFAULT_COMPONENT;
     weighted += base * (m.percent / 100);
   }
 
   return Math.round(Math.max(0, Math.min(100, weighted)));
 }
 
+/** Weighted blend of fiber **quality** (durability, hand-feel index in the library), by composition %. */
+export async function computeMaterialQualityScore(materials: ParsedMaterial[]): Promise<number> {
+  if (materials.length === 0) return DEFAULT_COMPONENT;
+
+  let sumPct = materials.reduce((a, m) => a + m.percent, 0);
+  const normalized = materials.map((m) => ({
+    name: normalizeMaterialKey(m.name),
+    percent: m.percent,
+  }));
+
+  if (sumPct < 60 || sumPct > 140) {
+    const equal = 100 / normalized.length;
+    normalized.forEach((m, i) => {
+      normalized[i] = { ...m, percent: equal };
+    });
+    sumPct = 100;
+  } else if (sumPct !== 100 && sumPct > 0) {
+    normalized.forEach((m, i) => {
+      normalized[i] = { ...m, percent: (m.percent / sumPct) * 100 };
+    });
+  }
+
+  let weighted = 0;
+  for (const m of normalized) {
+    const row = await fetchMaterialByName(m.name);
+    const base = row ? materialQualityBase(row) : DEFAULT_COMPONENT;
+    weighted += base * (m.percent / 100);
+  }
+
+  return Math.round(Math.max(0, Math.min(100, weighted)));
+}
+
+/** Company-level **brand practices** score from the library (overall_brand_score). */
 export async function computeBrandScore(brandName: string): Promise<number> {
   const key = brandName.trim();
   if (!key) return DEFAULT_COMPONENT;
@@ -75,25 +117,29 @@ export async function computeCountryScore(countryName: string): Promise<{
 export async function computeFullScore(parsed: ParsedTag): Promise<{
   brandScore: number;
   materialScore: number;
+  materialQualityScore: number;
   countryScore: number;
   overallScore: number;
   countryNote: string | null;
 }> {
-  const [brandScore, materialScore, countryPart] = await Promise.all([
+  const [brandScore, materialScore, materialQualityScore, countryPart] = await Promise.all([
     computeBrandScore(parsed.brand),
     computeMaterialScore(parsed.materials),
+    computeMaterialQualityScore(parsed.materials),
     computeCountryScore(parsed.country),
   ]);
 
   const overall = Math.round(
-    WEIGHT_BRAND * brandScore +
-      WEIGHT_MATERIAL * materialScore +
-      WEIGHT_COUNTRY * countryPart.score,
+    WEIGHT_MATERIAL_SUSTAINABILITY * materialScore +
+      WEIGHT_COUNTRY * countryPart.score +
+      WEIGHT_BRAND_PRACTICES * brandScore +
+      WEIGHT_MATERIAL_QUALITY * materialQualityScore,
   );
 
   return {
     brandScore,
     materialScore,
+    materialQualityScore,
     countryScore: countryPart.score,
     overallScore: Math.max(0, Math.min(100, overall)),
     countryNote: countryPart.note,

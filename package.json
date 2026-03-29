@@ -4,6 +4,7 @@
   "version": "1.0.0",
   "scripts": {
     "seed:generate": "node scripts/generate-reference-seed.mjs",
+    "seed:calibrate": "node scripts/apply-gentle-lift-to-seed.mjs",
     "start": "expo start",
     "android": "expo start --android",
     "ios": "expo start --ios",

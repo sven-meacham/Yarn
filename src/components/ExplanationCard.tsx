@@ -10,7 +10,7 @@ type Props = {
 };
 
 /** Renders markdown-lite: **bold** segments only */
-function RichText({ text, baseStyle }: { text: string; baseStyle: object }) {
+export function RichText({ text, baseStyle }: { text: string; baseStyle: object }) {
   const parts = text.split(/(\*\*[^*]+\*\*)/g).filter((p) => p.length > 0);
   return (
     <Text style={baseStyle}>

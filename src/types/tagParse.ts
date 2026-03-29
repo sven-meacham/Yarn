@@ -18,8 +18,12 @@ export type FullScanResult = {
   parsed: ParsedTag;
   rawText: string;
   explanation: string;
-  brandScore: number;
+  /** Brand practices (library overall_brand_score) — ethics / sustainability / transparency blend. */
+  brandScore?: number;
+  /** Fiber sustainability (library), weighted by blend — used in overall. */
   materialScore: number;
+  /** Fiber quality / hand-feel index (library), weighted by blend — used in overall. */
+  materialQualityScore?: number;
   countryScore: number;
   overallScore: number;
   countryNote: string | null;

@@ -1,6 +1,6 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { create } from 'zustand';
 
+import { safeGetItem, safeSetItem } from '@/src/storage/safeAsyncStorage';
 import type { FullScanResult } from '@/src/types/tagParse';
 
 const KEY = 'yarn-scan-history-v1';
@@ -15,7 +15,7 @@ export type ScanHistoryItem = {
 
 async function load(): Promise<ScanHistoryItem[]> {
   try {
-    const raw = await AsyncStorage.getItem(KEY);
+    const raw = await safeGetItem(KEY);
     if (!raw) return [];
     return JSON.parse(raw) as ScanHistoryItem[];
   } catch {
@@ -24,7 +24,7 @@ async function load(): Promise<ScanHistoryItem[]> {
 }
 
 async function save(items: ScanHistoryItem[]) {
-  await AsyncStorage.setItem(KEY, JSON.stringify(items.slice(0, MAX)));
+  await safeSetItem(KEY, JSON.stringify(items.slice(0, MAX)));
 }
 
 type State = {
@@ -48,6 +48,8 @@ export const useScanHistoryStore = create<State>((set, get) => ({
     const item: ScanHistoryItem = { id, at: Date.now(), snapshot };
     const next = [item, ...get().items].slice(0, MAX);
     set({ items: next });
-    save(next);
+    void save(next).catch(() => {
+      /* safeSetItem already falls back; avoid unhandled rejection */
+    });
   },
 }));
