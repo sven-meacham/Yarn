@@ -22,7 +22,7 @@ export default function SplashScreen() {
   useEffect(() => {
     if (!bootstrapped) return;
     if (isSignedIn) {
-      router.replace('/camera');
+      router.replace('/(tabs)/scan');
       return;
     }
     let cancelled = false;

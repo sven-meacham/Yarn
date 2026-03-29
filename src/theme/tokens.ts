@@ -24,6 +24,9 @@ export const colors = {
   /** Splash / sign-in wordmark */
   brandPink: '#E879B8',
   brandPinkDark: '#D462A8',
+  /** Active tab / segment pill (darker than surface) */
+  tabPill: '#E4E1DC',
+  tabPillBorder: '#D6D3CC',
 };
 
 export const spacing = {

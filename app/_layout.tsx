@@ -62,7 +62,7 @@ export default function RootLayout() {
       >
         <Stack.Screen name="index" options={{ headerShown: false }} />
         <Stack.Screen name="sign-in" options={{ headerShown: false }} />
-        <Stack.Screen name="camera" options={{ headerShown: false }} />
+        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen
           name="processing"
           options={{ title: 'Scanning', presentation: 'modal' }}

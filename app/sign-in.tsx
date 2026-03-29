@@ -40,7 +40,7 @@ export default function SignInScreen() {
 
   useEffect(() => {
     if (!bootstrapped) return;
-    if (isSignedIn) router.replace('/camera');
+    if (isSignedIn) router.replace('/(tabs)/scan');
   }, [bootstrapped, isSignedIn]);
 
   function runYarnExitAnimation() {
@@ -90,7 +90,7 @@ export default function SignInScreen() {
           easing: Easing.out(Easing.quad),
           useNativeDriver: true,
         }).start(() => {
-          router.replace('/camera');
+          router.replace('/(tabs)/scan');
         });
       });
     });

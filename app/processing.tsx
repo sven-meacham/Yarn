@@ -7,6 +7,7 @@ import { Screen } from '@/src/components/Screen';
 import { processTagImage, processTagLocalFallback } from '@/src/services/processTag';
 import { buildCategoryExplanations } from '@/src/services/categoryExplanations';
 import { computeFullScore } from '@/src/services/score';
+import { useScanHistoryStore } from '@/src/store/useScanHistoryStore';
 import { useScanStore } from '@/src/store/useScanStore';
 import type { FullScanResult } from '@/src/types/tagParse';
 import { colors, spacing } from '@/src/theme/tokens';
@@ -90,6 +91,7 @@ Made in Vietnam`;
         };
 
         setResult(full);
+        useScanHistoryStore.getState().addFromResult(full);
         router.replace('/results');
       } catch (e) {
         if (cancelled) return;

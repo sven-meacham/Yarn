@@ -85,3 +85,45 @@ export async function fetchCountryByName(name: string): Promise<CountryRow | nul
   }
   return data as CountryRow | null;
 }
+
+/** Top brands by overall score (higher = better). */
+export async function fetchTopBrands(limit = 10): Promise<BrandRow[]> {
+  const { data, error } = await supabase
+    .from('brands')
+    .select('*')
+    .order('overall_brand_score', { ascending: false })
+    .limit(limit);
+  if (error) {
+    console.warn('fetchTopBrands', error.message);
+    return [];
+  }
+  return (data ?? []) as BrandRow[];
+}
+
+/** Top materials by sustainability score. */
+export async function fetchTopMaterials(limit = 10): Promise<MaterialRow[]> {
+  const { data, error } = await supabase
+    .from('materials')
+    .select('*')
+    .order('sustainability_score', { ascending: false })
+    .limit(limit);
+  if (error) {
+    console.warn('fetchTopMaterials', error.message);
+    return [];
+  }
+  return (data ?? []) as MaterialRow[];
+}
+
+/** Best manufacturing countries = lowest manufacturing risk. */
+export async function fetchTopCountries(limit = 10): Promise<CountryRow[]> {
+  const { data, error } = await supabase
+    .from('countries')
+    .select('*')
+    .order('manufacturing_risk_score', { ascending: true })
+    .limit(limit);
+  if (error) {
+    console.warn('fetchTopCountries', error.message);
+    return [];
+  }
+  return (data ?? []) as CountryRow[];
+}

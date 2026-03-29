@@ -18,13 +18,10 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { PrimaryButton } from '@/src/components/PrimaryButton';
 import { Screen } from '@/src/components/Screen';
 import { YarnBallButton } from '@/src/components/YarnBallButton';
-import { useAuthStore } from '@/src/store/useAuthStore';
 import { fontBrand } from '@/src/theme/fonts';
 import { colors, spacing } from '@/src/theme/tokens';
 
-export default function CameraScreen() {
-  const bootstrapped = useAuthStore((s) => s.bootstrapped);
-  const isSignedIn = useAuthStore((s) => s.isSignedIn);
+export default function ScanTabScreen() {
   const insets = useSafeAreaInsets();
   const cameraRef = useRef<CameraView>(null);
   const [permission, requestPermission] = useCameraPermissions();
@@ -33,14 +30,6 @@ export default function CameraScreen() {
   const scanAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    if (!bootstrapped) return;
-    if (!isSignedIn) {
-      router.replace('/sign-in');
-    }
-  }, [bootstrapped, isSignedIn]);
-
-  useEffect(() => {
-    if (!bootstrapped || !isSignedIn) return;
     const loop = Animated.loop(
       Animated.sequence([
         Animated.timing(scanAnim, {
@@ -59,15 +48,7 @@ export default function CameraScreen() {
     );
     loop.start();
     return () => loop.stop();
-  }, [bootstrapped, isSignedIn, scanAnim]);
-
-  if (!bootstrapped || !isSignedIn) {
-    return (
-      <View style={{ flex: 1, backgroundColor: '#fff' }}>
-        <StatusBar style="dark" />
-      </View>
-    );
-  }
+  }, [scanAnim]);
 
   async function openLibrary() {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
