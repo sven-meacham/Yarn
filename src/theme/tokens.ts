@@ -21,6 +21,9 @@ export const colors = {
   explainerWarnBg: '#FFFBEB',
   explainerTag: '#475569',
   explainerTagBg: '#F1F5F9',
+  /** Splash / sign-in wordmark */
+  brandPink: '#E879B8',
+  brandPinkDark: '#D462A8',
 };
 
 export const spacing = {

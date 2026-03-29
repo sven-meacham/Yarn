@@ -20,7 +20,7 @@ export default function ResultsScreen() {
 
   useEffect(() => {
     if (!result) {
-      router.replace('/');
+      router.replace('/camera');
     }
   }, [result, router]);
 
@@ -173,7 +173,7 @@ export default function ResultsScreen() {
         label="Scan another tag"
         onPress={() => {
           useScanStore.getState().setResult(null);
-          router.replace('/');
+          router.replace('/camera');
         }}
       />
 
