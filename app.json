@@ -32,6 +32,12 @@
     "plugins": [
       "expo-router",
       [
+        "expo-camera",
+        {
+          "cameraPermission": "YARN needs camera access to photograph clothing tags."
+        }
+      ],
+      [
         "expo-image-picker",
         {
           "photosPermission": "YARN needs access to your photos to scan clothing tags.",

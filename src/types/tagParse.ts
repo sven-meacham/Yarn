@@ -1,3 +1,5 @@
+export type FieldKey = 'brand' | 'materials' | 'country';
+
 export type ParsedMaterial = { name: string; percent: number };
 
 export type ParsedTag = {
@@ -16,4 +18,8 @@ export type FullScanResult = {
   overallScore: number;
   countryNote: string | null;
   brandName: string;
+  /** Local file URI of the tag photo (for results UI). */
+  tagImageUri: string | null;
+  /** Which fields were not detected; user can add details to refine scoring. */
+  missingFields: Partial<Record<FieldKey, true>>;
 };

@@ -9,6 +9,7 @@ import { computeFullScore } from '@/src/services/score';
 import { useScanStore } from '@/src/store/useScanStore';
 import type { FullScanResult } from '@/src/types/tagParse';
 import { colors, spacing } from '@/src/theme/tokens';
+import { computeMissingFields } from '@/src/utils/tagFields';
 
 export default function ProcessingScreen() {
   const router = useRouter();
@@ -81,6 +82,8 @@ Made in Vietnam`;
           overallScore: scores.overallScore,
           countryNote: scores.countryNote,
           brandName: pipeline.parsed.brand,
+          tagImageUri: useMock ? null : rawUri,
+          missingFields: computeMissingFields(pipeline.parsed),
         };
 
         setResult(full);
