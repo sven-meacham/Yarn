@@ -1,5 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
+import { useRouter } from 'expo-router';
 import { useCallback, useState } from 'react';
 import type { ReactNode } from 'react';
 import {
@@ -11,12 +12,14 @@ import {
   View,
 } from 'react-native';
 import { Screen } from '@/src/components/Screen';
+import { TabYarnIcon } from '@/src/components/TabYarnIcon';
 import type { BrandRow, CountryRow, MaterialRow } from '@/src/services/supabase';
 import {
   fetchTopBrands,
   fetchTopCountries,
   fetchTopMaterials,
 } from '@/src/services/supabase';
+import { fontBrand } from '@/src/theme/fonts';
 import { colors, radius, spacing } from '@/src/theme/tokens';
 import { dotColor } from '@/src/utils/tagFields';
 import { flagEmojiForCountry } from '@/src/utils/countryFlags';
@@ -40,16 +43,22 @@ function TopRow({
   subtitle,
   score,
   left,
+  onPress,
 }: {
   rank: number;
   title: string;
   subtitle: string;
   score: number;
   left: ReactNode;
+  onPress: () => void;
 }) {
   const tint = dotColor(score);
   return (
-    <View style={styles.row}>
+    <Pressable
+      onPress={onPress}
+      style={({ pressed }) => [styles.row, pressed && styles.rowPressed]}
+      accessibilityRole="button"
+    >
       {left}
       <Text style={styles.rank}>{rank}</Text>
       <View style={styles.mid}>
@@ -65,20 +74,18 @@ function TopRow({
         </View>
       </View>
       <Ionicons name="chevron-forward" size={18} color={colors.border} />
-    </View>
+    </Pressable>
   );
 }
 
 const SEGMENT_LEAD: Record<Segment, string> = {
-  brands:
-    'Sorted by library overall brand score (ethics + sustainability + transparency). A scan’s on-screen % blends brand, materials, and country with different weights, so it won’t always match this list.',
-  materials:
-    'Sorted by material sustainability score in the library. Organic cotton and similar entries rank highest when their seeded scores are highest.',
-  countries:
-    'Sorted by lowest manufacturing risk (best first). The score shown is 100 minus risk, so higher is better for people and environment in our model.',
+  brands: 'Top 10 by library overall score (ethics · sustainability · transparency).',
+  materials: 'Top 10 by fiber sustainability score in the library.',
+  countries: 'Top 10 by lowest manufacturing risk (display score = 100 − risk).',
 };
 
-export default function TopsScreen() {
+export default function TopsIndexScreen() {
+  const router = useRouter();
   const [segment, setSegment] = useState<Segment>('brands');
   const [brands, setBrands] = useState<BrandRow[]>([]);
   const [materials, setMaterials] = useState<MaterialRow[]>([]);
@@ -107,8 +114,19 @@ export default function TopsScreen() {
     }, [load]),
   );
 
+  function openDetail(kind: 'brand' | 'material' | 'country', id: string, rank: number) {
+    router.push({
+      pathname: '/(tabs)/tops/detail',
+      params: { kind, id, rank: String(rank) },
+    });
+  }
+
   return (
     <Screen scroll={false}>
+      <View style={styles.brandBar}>
+        <TabYarnIcon size={28} />
+        <Text style={styles.brandWordmark}>Yarn</Text>
+      </View>
       <View style={styles.segmentWrap}>
         <Pressable
           onPress={() => setSegment('brands')}
@@ -192,6 +210,7 @@ export default function TopsScreen() {
                 subtitle={`Library overall · sustainability factor ${row.sustainability_score}/100`}
                 score={row.overall_brand_score}
                 left={<BrandGlyph name={row.name} />}
+                onPress={() => openDetail('brand', row.id, i + 1)}
               />
             ))}
 
@@ -208,6 +227,7 @@ export default function TopsScreen() {
                     <Ionicons name={materialTabIcon(row.name)} size={22} color={colors.accent} />
                   </View>
                 }
+                onPress={() => openDetail('material', row.id, i + 1)}
               />
             ))}
 
@@ -222,6 +242,7 @@ export default function TopsScreen() {
                   subtitle={`Manufacturing risk ${row.manufacturing_risk_score}/100 (lower is better)`}
                   score={placeScore}
                   left={<Text style={styles.flag}>{flagEmojiForCountry(row.name)}</Text>}
+                  onPress={() => openDetail('country', row.id, i + 1)}
                 />
               );
             })}
@@ -232,11 +253,24 @@ export default function TopsScreen() {
 }
 
 const styles = StyleSheet.create({
+  brandBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    paddingTop: 2,
+    paddingBottom: spacing.xs,
+  },
+  brandWordmark: {
+    fontFamily: fontBrand,
+    fontSize: 26,
+    color: colors.accent,
+    letterSpacing: 0.5,
+  },
   segmentWrap: {
     flexDirection: 'row',
-    paddingHorizontal: spacing.md,
-    paddingTop: spacing.sm,
-    paddingBottom: spacing.sm,
+    paddingHorizontal: 0,
+    paddingTop: 0,
+    paddingBottom: spacing.xs,
     gap: spacing.sm,
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: colors.border,
@@ -246,7 +280,7 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: spacing.sm,
+    paddingVertical: spacing.xs + 2,
     borderRadius: radius.md,
     borderWidth: 1,
     borderColor: colors.border,
@@ -274,14 +308,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   scroll: {
-    padding: spacing.md,
+    paddingHorizontal: 0,
+    paddingTop: spacing.sm,
     paddingBottom: spacing.xl * 2,
   },
   pageLead: {
-    fontSize: 14,
-    lineHeight: 20,
+    fontSize: 11,
+    lineHeight: 15,
     color: colors.textMuted,
-    marginBottom: spacing.lg,
+    marginBottom: spacing.sm,
   },
   row: {
     flexDirection: 'row',
@@ -290,6 +325,9 @@ const styles = StyleSheet.create({
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: colors.border,
     gap: spacing.sm,
+  },
+  rowPressed: {
+    opacity: 0.88,
   },
   rank: {
     fontSize: 16,

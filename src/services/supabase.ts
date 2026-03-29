@@ -22,6 +22,8 @@ export type BrandRow = {
   transparency_score: number;
   overall_brand_score: number;
   notes: string | null;
+  /** Two-sentence blurbs for Top detail — set in Supabase after migration. */
+  short_description?: string | null;
 };
 
 export type MaterialRow = {
@@ -32,6 +34,7 @@ export type MaterialRow = {
   health_note: string | null;
   sustainability_note: string | null;
   score_adjustment: number | null;
+  short_description?: string | null;
 };
 
 export type CountryRow = {
@@ -39,6 +42,7 @@ export type CountryRow = {
   name: string;
   manufacturing_risk_score: number;
   note: string | null;
+  short_description?: string | null;
 };
 
 export async function fetchBrandByName(name: string): Promise<BrandRow | null> {
@@ -81,6 +85,36 @@ export async function fetchCountryByName(name: string): Promise<CountryRow | nul
     .maybeSingle();
   if (error) {
     console.warn('fetchCountryByName', error.message);
+    return null;
+  }
+  return data as CountryRow | null;
+}
+
+export async function fetchBrandById(id: string): Promise<BrandRow | null> {
+  if (!id?.trim()) return null;
+  const { data, error } = await supabase.from('brands').select('*').eq('id', id).maybeSingle();
+  if (error) {
+    console.warn('fetchBrandById', error.message);
+    return null;
+  }
+  return data as BrandRow | null;
+}
+
+export async function fetchMaterialById(id: string): Promise<MaterialRow | null> {
+  if (!id?.trim()) return null;
+  const { data, error } = await supabase.from('materials').select('*').eq('id', id).maybeSingle();
+  if (error) {
+    console.warn('fetchMaterialById', error.message);
+    return null;
+  }
+  return data as MaterialRow | null;
+}
+
+export async function fetchCountryById(id: string): Promise<CountryRow | null> {
+  if (!id?.trim()) return null;
+  const { data, error } = await supabase.from('countries').select('*').eq('id', id).maybeSingle();
+  if (error) {
+    console.warn('fetchCountryById', error.message);
     return null;
   }
   return data as CountryRow | null;

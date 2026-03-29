@@ -59,6 +59,7 @@ export default function TabsLayout() {
         name="tops"
         options={{
           title: 'Top',
+          headerShown: false,
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="ribbon-outline" size={size ?? 24} color={color} />
           ),

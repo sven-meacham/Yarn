@@ -27,6 +27,9 @@ export const colors = {
   /** Active tab / segment pill (darker than surface) */
   tabPill: '#E4E1DC',
   tabPillBorder: '#D6D3CC',
+  /** Stronger fill for selected bottom tab (readability) */
+  tabBarSelectedBg: '#D4D0C8',
+  tabBarSelectedBorder: '#B8B3A8',
 };
 
 export const spacing = {
