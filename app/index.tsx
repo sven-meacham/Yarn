@@ -10,9 +10,7 @@ import { colors } from '@/src/theme/tokens';
 
 const SPLASH_MS = 2400;
 
-/**
- * Hackathon intro: white screen, yarn ball + pink YARN, fades out → sign-in (or camera if already signed in).
- */
+/** Splash: yarn ball + YARN wordmark, then sign-in or main app if session restored. */
 export default function SplashScreen() {
   const bootstrapped = useAuthStore((s) => s.bootstrapped);
   const isSignedIn = useAuthStore((s) => s.isSignedIn);
@@ -83,8 +81,8 @@ const styles = StyleSheet.create({
     fontFamily: fontBrandSoft,
     fontSize: 44,
     letterSpacing: 3,
-    color: colors.brandPink,
-    textShadowColor: 'rgba(232, 121, 184, 0.35)',
+    color: colors.brandTeal,
+    textShadowColor: 'rgba(30, 122, 112, 0.3)',
     textShadowOffset: { width: 0, height: 2 },
     textShadowRadius: 8,
   },

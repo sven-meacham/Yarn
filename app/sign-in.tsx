@@ -100,7 +100,7 @@ export default function SignInScreen() {
     const t = email.trim();
     setErr(null);
     if (!EMAIL_RE.test(t)) {
-      setErr('Enter a valid email (demo — not sent anywhere).');
+      setErr('Enter a valid email address.');
       return;
     }
     setBusy(true);
@@ -147,9 +147,7 @@ export default function SignInScreen() {
 
         <Animated.View style={[styles.formBlock, { opacity: formOpacity }]}>
           <Text style={styles.title}>Sign in</Text>
-          <Text style={styles.sub}>
-            Hackathon demo — you’ll sign in again each time you open the app (nothing is saved).
-          </Text>
+          <Text style={styles.sub}>Know the impact of your clothing.</Text>
 
           <TextInput
             style={styles.input}
@@ -199,9 +197,9 @@ const styles = StyleSheet.create({
     fontFamily: fontBrandSoft,
     fontSize: 38,
     letterSpacing: 2,
-    color: colors.brandPink,
+    color: colors.brandTeal,
     textAlign: 'center',
-    textShadowColor: 'rgba(232, 121, 184, 0.3)',
+    textShadowColor: 'rgba(30, 122, 112, 0.25)',
     textShadowOffset: { width: 0, height: 2 },
     textShadowRadius: 6,
   },

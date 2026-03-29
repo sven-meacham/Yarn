@@ -1,35 +1,55 @@
+/**
+ * Cohesive palette: cool off-whites + forest greens + yarn teal + blue-teal accents.
+ * Avoids unrelated purples/oranges; earth tones stay muted.
+ */
 export const colors = {
-  background: '#F8F7F4',
+  /** Slightly cool canvas (harmonizes with teal UI) */
+  background: '#F6F9F8',
   surface: '#FFFFFF',
-  text: '#1A1A1A',
-  textMuted: '#6B6B6B',
-  accent: '#2D5A4A',
+
+  /** Body text — near-black with a hint of green */
+  text: '#1A2220',
+  /** Labels, secondary copy — sage gray */
+  textMuted: '#5C6D68',
+
+  /** Hairlines, cards */
+  border: '#DFE8E4',
+
+  /** Yarn ball + wordmarks */
+  brandTeal: '#2AA89A',
+  brandTealDark: '#1E7A70',
+
+  /** Primary actions, active tab, nav emphasis (forest green) */
+  accent: '#2A5E52',
   accentMuted: '#4A7D6A',
-  border: '#E8E6E1',
-  danger: '#C45C4A',
-  scoreHigh: '#2D5A4A',
-  scoreMid: '#B8860B',
+
+  /** Errors / destructive */
+  danger: '#B85C4A',
+
+  /** Score dots — high / mid / low */
+  scoreHigh: '#2A5E52',
+  scoreMid: '#A67C2A',
   scoreLow: '#A85A4A',
-  /** Category explainer accents */
-  explainerBrand: '#4F46E5',
-  explainerBrandBg: '#EEF2FF',
+  /** Hero score band on results when overall is low */
+  scoreBandLowBg: '#F5EBE8',
+
+  /** Results “What this means” — all in teal / blue-green / forest family */
+  explainerBrand: '#2A6A72',
+  explainerBrandBg: '#EEF6F6',
   explainerMaterials: '#0D9488',
-  explainerMaterialsBg: '#ECFDF9',
-  explainerCountry: '#C2410C',
-  explainerCountryBg: '#FFF7ED',
-  explainerWarn: '#B45309',
-  explainerWarnBg: '#FFFBEB',
-  explainerTag: '#475569',
-  explainerTagBg: '#F1F5F9',
-  /** Splash / sign-in wordmark */
-  brandPink: '#E879B8',
-  brandPinkDark: '#D462A8',
-  /** Active tab / segment pill (darker than surface) */
-  tabPill: '#E4E1DC',
-  tabPillBorder: '#D6D3CC',
-  /** Stronger fill for selected bottom tab (readability) */
-  tabBarSelectedBg: '#D4D0C8',
-  tabBarSelectedBorder: '#B8B3A8',
+  explainerMaterialsBg: '#E6F7F4',
+  explainerCountry: '#3D6B5C',
+  explainerCountryBg: '#EDF4F1',
+  explainerWarn: '#8A6B2E',
+  explainerWarnBg: '#FAF6E8',
+  explainerTag: '#4A6670',
+  explainerTagBg: '#EEF3F3',
+
+  /** Top tabs / segment pills */
+  tabPill: '#E2EAE7',
+  tabPillBorder: '#D0DCD8',
+  tabBarSelectedBg: '#D4E0DC',
+  tabBarSelectedBorder: '#B8C9C3',
 };
 
 export const spacing = {

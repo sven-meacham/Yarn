@@ -1,33 +1,49 @@
 import { create } from 'zustand';
 
-/**
- * Hackathon demo: in-memory only — no persistence. Every cold start is signed out
- * so splash → sign-in runs each time you open the app.
- */
+import { safeGetItem, safeRemoveItem, safeSetItem } from '@/src/storage/safeAsyncStorage';
+
+const AUTH_KEY = 'yarn-auth-session-v1';
+
 type AuthState = {
   email: string | null;
   isSignedIn: boolean;
   bootstrapped: boolean;
-  bootstrap: () => void;
-  signIn: (email: string) => void;
-  signOut: () => void;
+  bootstrap: () => Promise<void>;
+  signIn: (email: string) => Promise<void>;
+  signOut: () => Promise<void>;
 };
 
+/**
+ * Session persists across restarts (AsyncStorage). Scan history uses a separate key and also persists.
+ */
 export const useAuthStore = create<AuthState>((set) => ({
   email: null,
   isSignedIn: false,
   bootstrapped: false,
 
-  bootstrap: () => {
+  bootstrap: async () => {
+    try {
+      const raw = await safeGetItem(AUTH_KEY);
+      if (raw) {
+        const data = JSON.parse(raw) as { email?: string | null };
+        if (typeof data.email === 'string' && data.email.trim()) {
+          set({ email: data.email.trim(), isSignedIn: true });
+        }
+      }
+    } catch {
+      /* ignore corrupt storage */
+    }
     set({ bootstrapped: true });
   },
 
-  signIn: (email: string) => {
+  signIn: async (email: string) => {
     const trimmed = email.trim();
     set({ email: trimmed, isSignedIn: true });
+    await safeSetItem(AUTH_KEY, JSON.stringify({ email: trimmed }));
   },
 
-  signOut: () => {
+  signOut: async () => {
     set({ email: null, isSignedIn: false });
+    await safeRemoveItem(AUTH_KEY);
   },
 }));

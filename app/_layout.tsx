@@ -8,6 +8,7 @@ import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 
 import { useAuthStore } from '@/src/store/useAuthStore';
+import { useScanHistoryStore } from '@/src/store/useScanHistoryStore';
 import { colors } from '@/src/theme/tokens';
 
 SplashScreen.preventAutoHideAsync();
@@ -35,7 +36,12 @@ export default function RootLayout() {
   const bootstrap = useAuthStore((s) => s.bootstrap);
 
   useEffect(() => {
-    bootstrap();
+    void (async () => {
+      await Promise.all([
+        bootstrap(),
+        useScanHistoryStore.getState().hydrate(),
+      ]);
+    })();
   }, [bootstrap]);
 
   useEffect(() => {

@@ -50,3 +50,24 @@ export async function safeSetItem(key: string, value: string): Promise<void> {
     /* memory-only for this session */
   }
 }
+
+export async function safeRemoveItem(key: string): Promise<void> {
+  if (Platform.OS === 'web') {
+    try {
+      if (typeof globalThis !== 'undefined' && 'localStorage' in globalThis) {
+        (globalThis as unknown as { localStorage: Storage }).localStorage.removeItem(key);
+        return;
+      }
+    } catch {
+      /* ignore */
+    }
+    delete memoryStore[key];
+    return;
+  }
+  delete memoryStore[key];
+  try {
+    await AsyncStorage.removeItem(key);
+  } catch {
+    /* ignore */
+  }
+}

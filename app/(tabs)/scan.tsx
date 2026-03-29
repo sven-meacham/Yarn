@@ -252,7 +252,7 @@ const styles = StyleSheet.create({
     left: VIEWFINDER_CORNER,
     right: VIEWFINDER_CORNER,
     height: SCAN_LINE_HEIGHT,
-    backgroundColor: '#22C55E',
+    backgroundColor: colors.brandTeal,
     opacity: 0.95,
   },
   frameHint: {

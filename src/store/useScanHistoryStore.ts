@@ -31,7 +31,8 @@ type State = {
   items: ScanHistoryItem[];
   hydrated: boolean;
   hydrate: () => Promise<void>;
-  addFromResult: (snapshot: FullScanResult) => void;
+  /** Persists to AsyncStorage — await so the write finishes before navigating away. */
+  addFromResult: (snapshot: FullScanResult) => Promise<void>;
 };
 
 export const useScanHistoryStore = create<State>((set, get) => ({
@@ -43,13 +44,11 @@ export const useScanHistoryStore = create<State>((set, get) => ({
     set({ items, hydrated: true });
   },
 
-  addFromResult: (snapshot: FullScanResult) => {
+  addFromResult: async (snapshot: FullScanResult) => {
     const id = `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
     const item: ScanHistoryItem = { id, at: Date.now(), snapshot };
     const next = [item, ...get().items].slice(0, MAX);
     set({ items: next });
-    void save(next).catch(() => {
-      /* safeSetItem already falls back; avoid unhandled rejection */
-    });
+    await save(next);
   },
 }));

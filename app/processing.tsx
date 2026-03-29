@@ -118,7 +118,7 @@ Made in Vietnam`;
         };
 
         setResult(full);
-        useScanHistoryStore.getState().addFromResult(full);
+        await useScanHistoryStore.getState().addFromResult(full);
         router.replace('/results');
       } catch (e) {
         if (cancelled) return;

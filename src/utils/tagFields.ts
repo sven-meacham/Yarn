@@ -1,4 +1,5 @@
 import type { FieldKey, ParsedTag } from '@/src/types/tagParse';
+import { colors } from '@/src/theme/tokens';
 
 export type { FieldKey };
 
@@ -35,7 +36,7 @@ export function scoreLabel(score: number): 'Good' | 'Fair' | 'Poor' {
 }
 
 export function dotColor(score: number): string {
-  if (score >= 70) return '#2D5A4A';
-  if (score >= 45) return '#B8860B';
-  return '#C45C4A';
+  if (score >= 70) return colors.scoreHigh;
+  if (score >= 45) return colors.scoreMid;
+  return colors.scoreLow;
 }

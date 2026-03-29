@@ -63,7 +63,11 @@ export default function ResultsScreen() {
   const overallTint = dotColor(overallScore);
   const label = scoreLabel(overallScore);
   const scoreBandBg =
-    overallScore >= 70 ? colors.explainerMaterialsBg : overallScore >= 45 ? colors.explainerWarnBg : '#FDE8E4';
+    overallScore >= 70
+      ? colors.explainerMaterialsBg
+      : overallScore >= 45
+        ? colors.explainerWarnBg
+        : colors.scoreBandLowBg;
 
   const matSummary = parsed.materials
     .map((m) => `${Math.round(m.percent)}% ${m.name}`)
