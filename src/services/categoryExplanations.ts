@@ -80,7 +80,7 @@ async function explainBrand(parsed: ParsedTag, brandScore: number): Promise<stri
 
   const parts: string[] = [];
   parts.push(
-    `**Brand practices component: ${brandScore}/100** — from our library’s overall brand index (**${row.overall_brand_score}/100**; ethics ${row.ethics_score}, sustainability ${row.sustainability_score}, transparency ${row.transparency_score}). This is blended into the headline score (it is **not** a popularity or marketing score).`,
+    'This is **blended into the headline score**. It is **not** a popularity or marketing score—it reflects published ethics, sustainability, and transparency signals from our library.',
   );
   if (row.notes?.trim()) {
     parts.push(row.notes.trim());

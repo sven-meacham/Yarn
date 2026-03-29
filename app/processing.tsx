@@ -1,9 +1,10 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useEffect, useState } from 'react';
-import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
+import { useEffect, useRef, useState } from 'react';
+import { Animated, Easing, StyleSheet, Text, View } from 'react-native';
 
 import { PrimaryButton } from '@/src/components/PrimaryButton';
 import { Screen } from '@/src/components/Screen';
+import { YarnBallGraphic } from '@/src/components/YarnBallGraphic';
 import { processTagImage, processTagLocalFallback } from '@/src/services/processTag';
 import { buildCategoryExplanations } from '@/src/services/categoryExplanations';
 import { computeFullScore } from '@/src/services/score';
@@ -20,6 +21,30 @@ export default function ProcessingScreen() {
 
   const [status, setStatus] = useState('Reading tag…');
   const [error, setError] = useState<string | null>(null);
+  const bounce = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    const loop = Animated.loop(
+      Animated.sequence([
+        Animated.timing(bounce, {
+          toValue: 1,
+          duration: 320,
+          easing: Easing.out(Easing.quad),
+          useNativeDriver: true,
+        }),
+        Animated.spring(bounce, {
+          toValue: 0,
+          friction: 4.5,
+          tension: 120,
+          useNativeDriver: true,
+        }),
+      ]),
+    );
+    loop.start();
+    return () => {
+      loop.stop();
+    };
+  }, [bounce]);
 
   useEffect(() => {
     let cancelled = false;
@@ -89,6 +114,7 @@ Made in Vietnam`;
           tagImageUri: useMock ? null : rawUri,
           missingFields: computeMissingFields(pipeline.parsed),
           categoryExplanations,
+          brandLibraryBreakdown: scores.brandLibraryBreakdown,
         };
 
         setResult(full);
@@ -107,10 +133,20 @@ Made in Vietnam`;
     };
   }, [params.uri, params.mime, router, setResult]);
 
+  const bounceY = bounce.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0, -36],
+  });
+
   return (
     <Screen>
       <View style={styles.center}>
-        <ActivityIndicator size="large" color={colors.accent} />
+        <View style={styles.bounceStage}>
+          <View style={styles.ground} />
+          <Animated.View style={{ transform: [{ translateY: bounceY }] }}>
+            <YarnBallGraphic size={76} emphasized />
+          </Animated.View>
+        </View>
         <Text style={styles.status}>{status}</Text>
         {error ? (
           <View style={styles.errBox}>
@@ -131,8 +167,23 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.xl,
     gap: spacing.md,
   },
+  bounceStage: {
+    height: 120,
+    width: 140,
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+  },
+  ground: {
+    position: 'absolute',
+    bottom: 8,
+    left: 16,
+    right: 16,
+    height: 3,
+    borderRadius: 2,
+    backgroundColor: 'rgba(42, 168, 154, 0.35)',
+  },
   status: {
-    marginTop: spacing.md,
+    marginTop: spacing.sm,
     fontSize: 16,
     color: colors.textMuted,
   },

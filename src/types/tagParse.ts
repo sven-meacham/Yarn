@@ -4,6 +4,14 @@ export type CategoryExplanations = {
   country: string;
 };
 
+/** Sub-scores from Supabase when the brand exists in the library (for results UI). */
+export type BrandLibraryBreakdown = {
+  libraryOverall: number;
+  ethics: number;
+  sustainability: number;
+  transparency: number;
+};
+
 export type FieldKey = 'brand' | 'materials' | 'country';
 
 export type ParsedMaterial = { name: string; percent: number };
@@ -34,4 +42,6 @@ export type FullScanResult = {
   missingFields: Partial<Record<FieldKey, true>>;
   /** Plain-language breakdown (Supabase-backed when data exists). */
   categoryExplanations: CategoryExplanations;
+  /** Ethics / sustainability / transparency from library when brand row exists. */
+  brandLibraryBreakdown?: BrandLibraryBreakdown | null;
 };

@@ -54,6 +54,7 @@ export default function ResultsScreen() {
     tagImageUri,
     missingFields,
     categoryExplanations,
+    brandLibraryBreakdown,
   } = result;
 
   const materialQualityScore = mqFromResult ?? materialScore;
@@ -139,6 +140,11 @@ export default function ResultsScreen() {
           onToggle={() => toggle('brand')}
           showAddDetails={!!missingFields.brand}
           onAddDetails={() => setDetailsOpen(true)}
+          brandScoreBreakdown={
+            brandLibraryBreakdown
+              ? { componentScore: brandScore, library: brandLibraryBreakdown }
+              : null
+          }
         />
         <ExpandableCategoryScore
           icon="shirt-outline"

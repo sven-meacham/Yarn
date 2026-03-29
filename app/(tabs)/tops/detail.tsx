@@ -162,10 +162,6 @@ export default function TopDetailScreen() {
               <Card kicker="Reference notes">
                 <Text style={styles.bodyMuted}>{brand.notes.trim()}</Text>
               </Card>
-            ) : brand.notes?.trim() && brand.short_description?.trim() ? (
-              <Card kicker="More detail">
-                <Text style={styles.bodyMuted}>{brand.notes.trim()}</Text>
-              </Card>
             ) : null}
           </>
         ) : null}
@@ -194,11 +190,6 @@ export default function TopDetailScreen() {
               separately and also feeds your scan score.
             </Card>
 
-            {material.sustainability_note?.trim() ? (
-              <Card kicker="Sustainability detail">
-                <Text style={styles.bodyMuted}>{material.sustainability_note.trim()}</Text>
-              </Card>
-            ) : null}
             {material.health_note?.trim() ? (
               <Card kicker="Wear and feel">
                 <Text style={styles.body}>{material.health_note.trim()}</Text>
@@ -233,10 +224,6 @@ export default function TopDetailScreen() {
 
             {country.note?.trim() && !country.short_description?.trim() ? (
               <Card kicker="Reference notes">
-                <Text style={styles.bodyMuted}>{country.note.trim()}</Text>
-              </Card>
-            ) : country.note?.trim() && country.short_description?.trim() ? (
-              <Card kicker="More detail">
                 <Text style={styles.bodyMuted}>{country.note.trim()}</Text>
               </Card>
             ) : null}

@@ -58,6 +58,8 @@ export default function RootLayout() {
           headerShadowVisible: false,
           headerTitleStyle: { fontWeight: '700', fontSize: 18 },
           contentStyle: { backgroundColor: colors.background },
+          /** Avoid “(tabs)” as the previous route label on iOS */
+          headerBackTitle: 'Back',
         }}
       >
         <Stack.Screen name="index" options={{ headerShown: false }} />

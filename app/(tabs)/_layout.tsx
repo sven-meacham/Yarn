@@ -52,7 +52,7 @@ export default function TabsLayout() {
         options={{
           title: 'Scan',
           headerShown: false,
-          tabBarIcon: ({ focused }) => <TabYarnIcon focused={focused} />,
+          tabBarIcon: () => <TabYarnIcon />,
         }}
       />
       <Tabs.Screen

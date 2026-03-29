@@ -3,6 +3,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { RichText } from '@/src/components/ExplanationCard';
 import { colors, radius, spacing } from '@/src/theme/tokens';
+import type { BrandLibraryBreakdown } from '@/src/types/tagParse';
 import { dotColor, scoreLabel } from '@/src/utils/tagFields';
 
 type Props = {
@@ -23,6 +24,11 @@ type Props = {
   showAddDetails?: boolean;
   onAddDetails?: () => void;
   isLast?: boolean;
+  /** When set (brand row + library data), shows score bullets above the explanation text. */
+  brandScoreBreakdown?: {
+    componentScore: number;
+    library: BrandLibraryBreakdown;
+  } | null;
 };
 
 export function ExpandableCategoryScore({
@@ -41,6 +47,7 @@ export function ExpandableCategoryScore({
   showAddDetails,
   onAddDetails,
   isLast,
+  brandScoreBreakdown,
 }: Props) {
   const tint = score != null ? dotColor(score) : colors.textMuted;
   const label = score != null ? scoreLabel(score) : '';
@@ -122,6 +129,21 @@ export function ExpandableCategoryScore({
       {expanded ? (
         <View style={[styles.meaning, { borderLeftColor: accent, backgroundColor: background }]}>
           <Text style={[styles.meaningKicker, { color: accent }]}>What this means</Text>
+          {brandScoreBreakdown ? (
+            <View style={styles.brandBullets}>
+              <Text style={styles.bulletMain}>
+                <Text style={styles.bulletMark}>• </Text>
+                <Text style={styles.bulletLabel}>Brand practices (this item): </Text>
+                {brandScoreBreakdown.componentScore}/100
+              </Text>
+              <Text style={styles.bulletSub}>
+                • Library — Overall {brandScoreBreakdown.library.libraryOverall}/100 · Ethics{' '}
+                {brandScoreBreakdown.library.ethics} · Sustainability{' '}
+                {brandScoreBreakdown.library.sustainability} · Transparency{' '}
+                {brandScoreBreakdown.library.transparency}
+              </Text>
+            </View>
+          ) : null}
           <RichText text={explanationBody} baseStyle={styles.meaningBody} />
         </View>
       ) : null}
@@ -264,5 +286,29 @@ const styles = StyleSheet.create({
     fontSize: 15,
     lineHeight: 23,
     color: colors.text,
+  },
+  brandBullets: {
+    marginBottom: spacing.md,
+  },
+  bulletMain: {
+    fontSize: 16,
+    lineHeight: 24,
+    fontWeight: '700',
+    color: colors.text,
+    marginBottom: 6,
+  },
+  bulletMark: {
+    fontWeight: '700',
+    color: colors.textMuted,
+  },
+  bulletLabel: {
+    fontWeight: '800',
+    color: colors.text,
+  },
+  bulletSub: {
+    fontSize: 13,
+    lineHeight: 20,
+    color: colors.textMuted,
+    fontWeight: '500',
   },
 });

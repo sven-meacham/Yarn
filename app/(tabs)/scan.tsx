@@ -21,6 +21,12 @@ import { YarnBallButton } from '@/src/components/YarnBallButton';
 import { fontBrand } from '@/src/theme/fonts';
 import { colors, spacing } from '@/src/theme/tokens';
 
+/** Must match corner bracket size — scan line stays inside so it never crosses the white L-shapes */
+const VIEWFINDER_CORNER = 32;
+const SCAN_LINE_HEIGHT = 3;
+/** Tiny gap so the bar doesn’t sit flush on corner strokes (avoids antialiasing bleed) */
+const SCAN_LINE_PAD = 2;
+
 export default function ScanTabScreen() {
   const insets = useSafeAreaInsets();
   const cameraRef = useRef<CameraView>(null);
@@ -120,7 +126,10 @@ export default function ScanTabScreen() {
   const frameH = 220;
   const lineY = scanAnim.interpolate({
     inputRange: [0, 1],
-    outputRange: [0, frameH - 4],
+    outputRange: [
+      VIEWFINDER_CORNER + SCAN_LINE_PAD,
+      frameH - VIEWFINDER_CORNER - SCAN_LINE_HEIGHT - SCAN_LINE_PAD,
+    ],
   });
 
   return (
@@ -143,10 +152,14 @@ export default function ScanTabScreen() {
         </View>
 
         <View style={styles.frameOuter}>
-          <View style={[styles.frame, { height: frameH }]}>
+          <View style={[styles.frameArea, { height: frameH }]}>
+            <View style={[styles.corner, styles.cornerTL]} />
+            <View style={[styles.corner, styles.cornerTR]} />
+            <View style={[styles.corner, styles.cornerBL]} />
+            <View style={[styles.corner, styles.cornerBR]} />
             <Animated.View style={[styles.scanLine, { transform: [{ translateY: lineY }] }]} />
           </View>
-          <Text style={styles.frameHint}>Align the care tag inside the frame</Text>
+          <Text style={styles.frameHint}>Align the care tag inside the corners</Text>
         </View>
 
         <View style={[styles.bottomBar, { paddingBottom: insets.bottom + spacing.md }]}>
@@ -193,20 +206,52 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: spacing.lg,
   },
-  frame: {
+  /** Viewfinder-style corners only — no full box border */
+  frameArea: {
     width: '100%',
     maxWidth: 320,
-    borderRadius: 16,
-    borderWidth: 3,
-    borderColor: 'rgba(255,255,255,0.95)',
     overflow: 'hidden',
     backgroundColor: 'transparent',
   },
+  corner: {
+    position: 'absolute',
+    width: VIEWFINDER_CORNER,
+    height: VIEWFINDER_CORNER,
+    borderColor: 'rgba(255,255,255,0.95)',
+  },
+  cornerTL: {
+    top: 0,
+    left: 0,
+    borderTopWidth: 3,
+    borderLeftWidth: 3,
+    borderTopLeftRadius: 2,
+  },
+  cornerTR: {
+    top: 0,
+    right: 0,
+    borderTopWidth: 3,
+    borderRightWidth: 3,
+    borderTopRightRadius: 2,
+  },
+  cornerBL: {
+    bottom: 0,
+    left: 0,
+    borderBottomWidth: 3,
+    borderLeftWidth: 3,
+    borderBottomLeftRadius: 2,
+  },
+  cornerBR: {
+    bottom: 0,
+    right: 0,
+    borderBottomWidth: 3,
+    borderRightWidth: 3,
+    borderBottomRightRadius: 2,
+  },
   scanLine: {
     position: 'absolute',
-    left: 0,
-    right: 0,
-    height: 3,
+    left: VIEWFINDER_CORNER,
+    right: VIEWFINDER_CORNER,
+    height: SCAN_LINE_HEIGHT,
     backgroundColor: '#22C55E',
     opacity: 0.95,
   },

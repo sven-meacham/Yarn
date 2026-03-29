@@ -1,4 +1,4 @@
-import type { ParsedMaterial, ParsedTag } from '@/src/types/tagParse';
+import type { BrandLibraryBreakdown, ParsedMaterial, ParsedTag } from '@/src/types/tagParse';
 
 import type { MaterialRow } from '@/src/services/supabase';
 import { fetchBrandByName, fetchCountryByName, fetchMaterialByName } from '@/src/services/supabase';
@@ -91,13 +91,29 @@ export async function computeMaterialQualityScore(materials: ParsedMaterial[]): 
   return Math.round(Math.max(0, Math.min(100, weighted)));
 }
 
+async function getBrandPart(brandName: string): Promise<{
+  score: number;
+  breakdown: BrandLibraryBreakdown | null;
+}> {
+  const key = brandName.trim();
+  if (!key) return { score: DEFAULT_COMPONENT, breakdown: null };
+  const row = await fetchBrandByName(key);
+  if (!row) return { score: DEFAULT_COMPONENT, breakdown: null };
+  return {
+    score: Math.max(0, Math.min(100, row.overall_brand_score)),
+    breakdown: {
+      libraryOverall: row.overall_brand_score,
+      ethics: row.ethics_score,
+      sustainability: row.sustainability_score,
+      transparency: row.transparency_score,
+    },
+  };
+}
+
 /** Company-level **brand practices** score from the library (overall_brand_score). */
 export async function computeBrandScore(brandName: string): Promise<number> {
-  const key = brandName.trim();
-  if (!key) return DEFAULT_COMPONENT;
-  const row = await fetchBrandByName(key);
-  if (!row) return DEFAULT_COMPONENT;
-  return Math.max(0, Math.min(100, row.overall_brand_score));
+  const p = await getBrandPart(brandName);
+  return p.score;
 }
 
 export async function computeCountryScore(countryName: string): Promise<{
@@ -121,13 +137,15 @@ export async function computeFullScore(parsed: ParsedTag): Promise<{
   countryScore: number;
   overallScore: number;
   countryNote: string | null;
+  brandLibraryBreakdown: BrandLibraryBreakdown | null;
 }> {
-  const [brandScore, materialScore, materialQualityScore, countryPart] = await Promise.all([
-    computeBrandScore(parsed.brand),
+  const [brandPart, materialScore, materialQualityScore, countryPart] = await Promise.all([
+    getBrandPart(parsed.brand),
     computeMaterialScore(parsed.materials),
     computeMaterialQualityScore(parsed.materials),
     computeCountryScore(parsed.country),
   ]);
+  const brandScore = brandPart.score;
 
   const overall = Math.round(
     WEIGHT_MATERIAL_SUSTAINABILITY * materialScore +
@@ -143,5 +161,6 @@ export async function computeFullScore(parsed: ParsedTag): Promise<{
     countryScore: countryPart.score,
     overallScore: Math.max(0, Math.min(100, overall)),
     countryNote: countryPart.note,
+    brandLibraryBreakdown: brandPart.breakdown,
   };
 }

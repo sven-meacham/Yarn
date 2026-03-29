@@ -16,7 +16,7 @@ export default function TopsStackLayout() {
         options={{
           headerShown: true,
           title: 'Why this rank',
-          headerBackTitle: 'Top',
+          headerBackTitle: 'Back',
           headerStyle: { backgroundColor: colors.background },
           headerTintColor: colors.text,
           headerShadowVisible: false,

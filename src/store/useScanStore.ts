@@ -32,6 +32,7 @@ export const useScanStore = create<ScanState>((set, get) => ({
         brandName: parsed.brand,
         missingFields: computeMissingFields(parsed),
         categoryExplanations,
+        brandLibraryBreakdown: scores.brandLibraryBreakdown,
       },
     });
   },
