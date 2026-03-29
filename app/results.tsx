@@ -4,6 +4,7 @@ import { Image, StyleSheet, Text, View } from 'react-native';
 
 import { AddDetailsModal } from '@/src/components/AddDetailsModal';
 import { CategoryBreakdownRow } from '@/src/components/CategoryBreakdownRow';
+import { ExplanationCard } from '@/src/components/ExplanationCard';
 import { PrimaryButton } from '@/src/components/PrimaryButton';
 import { Screen } from '@/src/components/Screen';
 import { useScanStore } from '@/src/store/useScanStore';
@@ -39,28 +40,30 @@ export default function ResultsScreen() {
     materialScore,
     countryScore,
     explanation,
-    countryNote,
     parsed,
     rawText,
     tagImageUri,
     missingFields,
+    categoryExplanations,
   } = result;
 
   const overallTint = dotColor(overallScore);
   const label = scoreLabel(overallScore);
+  const scoreBandBg =
+    overallScore >= 70 ? colors.explainerMaterialsBg : overallScore >= 45 ? colors.explainerWarnBg : '#FDE8E4';
 
   const matSummary = parsed.materials
     .map((m) => `${Math.round(m.percent)}% ${m.name}`)
     .join(' · ');
 
   const brandSubtitle = missingFields.brand
-    ? 'Not detected from tag — score uses defaults.'
-    : `Recognized from care label.`;
+    ? 'Not on tag — neutral default.'
+    : 'From care label.';
   const matSubtitle = missingFields.materials
-    ? 'Fiber breakdown not found — score uses defaults.'
-    : matSummary || 'No materials listed.';
+    ? 'Not detected — neutral default.'
+    : matSummary || 'No fibers listed.';
   const countrySubtitle = missingFields.country
-    ? 'Country of manufacture not found — score uses defaults.'
+    ? 'Not detected — neutral default.'
     : parsed.country && parsed.country.toLowerCase() !== 'unknown'
       ? `Made in ${parsed.country}.`
       : 'Origin unclear.';
@@ -85,16 +88,21 @@ export default function ResultsScreen() {
         </View>
       </View>
 
-      <View style={styles.scoreBlock}>
-        <View style={[styles.bigDot, { backgroundColor: overallTint }]} />
-        <Text style={styles.scoreFraction}>
-          {overallScore}
-          <Text style={styles.scoreOutOf}>/100</Text>
-        </Text>
-        <Text style={styles.scoreLabel}>{label}</Text>
+      <View style={[styles.scoreBand, { backgroundColor: scoreBandBg }]}>
+        <View style={styles.scoreRow}>
+          <View style={[styles.bigDot, { backgroundColor: overallTint }]} />
+          <View>
+            <Text style={styles.scoreFraction}>
+              {overallScore}
+              <Text style={styles.scoreOutOf}>/100</Text>
+            </Text>
+            <Text style={[styles.scoreLabel, { color: overallTint }]}>{label}</Text>
+          </View>
+        </View>
+        <Text style={styles.scoreHint}>Weighted: brand 50% · materials 35% · country 15%</Text>
       </View>
 
-      <Text style={styles.sectionHead}>Categories</Text>
+      <Text style={styles.sectionHead}>Scores</Text>
       <View style={styles.listCard}>
         <CategoryBreakdownRow
           icon="pricetag-outline"
@@ -129,17 +137,32 @@ export default function ResultsScreen() {
         />
       </View>
 
-      {countryNote ? (
-        <View style={styles.block}>
-          <Text style={styles.sectionTitle}>Country note</Text>
-          <Text style={styles.body}>{countryNote}</Text>
-        </View>
-      ) : null}
+      <Text style={styles.sectionHead}>What this means</Text>
+      <ExplanationCard
+        title="Brand"
+        body={categoryExplanations.brand}
+        accent={colors.explainerBrand}
+        background={colors.explainerBrandBg}
+      />
+      <ExplanationCard
+        title="Materials"
+        body={categoryExplanations.materials}
+        accent={colors.explainerMaterials}
+        background={colors.explainerMaterialsBg}
+      />
+      <ExplanationCard
+        title="Place of manufacturing"
+        body={categoryExplanations.country}
+        accent={colors.explainerCountry}
+        background={colors.explainerCountryBg}
+      />
 
-      <View style={styles.block}>
-        <Text style={styles.sectionTitle}>Why this score</Text>
-        <Text style={styles.body}>{explanation}</Text>
-      </View>
+      <ExplanationCard
+        title="Tag read (AI / OCR)"
+        body={explanation.trim() || 'No extra detail from the parser.'}
+        accent={colors.explainerTag}
+        background={colors.explainerTagBg}
+      />
 
       <View style={styles.rawWrap}>
         <Text style={styles.rawLabel}>Raw tag text</Text>
@@ -205,18 +228,25 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: colors.textMuted,
   },
-  scoreBlock: {
+  scoreBand: {
+    borderRadius: 16,
+    padding: spacing.lg,
+    marginBottom: spacing.lg,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  scoreRow: {
+    flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: spacing.xl,
+    gap: spacing.md,
   },
   bigDot: {
-    width: 18,
-    height: 18,
-    borderRadius: 9,
-    marginBottom: spacing.sm,
+    width: 22,
+    height: 22,
+    borderRadius: 11,
   },
   scoreFraction: {
-    fontSize: 44,
+    fontSize: 40,
     fontWeight: '800',
     color: colors.text,
   },
@@ -226,10 +256,14 @@ const styles = StyleSheet.create({
     color: colors.textMuted,
   },
   scoreLabel: {
-    marginTop: 4,
-    fontSize: 15,
+    marginTop: 2,
+    fontSize: 16,
+    fontWeight: '700',
+  },
+  scoreHint: {
+    marginTop: spacing.sm,
+    fontSize: 13,
     color: colors.textMuted,
-    fontWeight: '500',
   },
   sectionHead: {
     fontSize: 13,
@@ -246,20 +280,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.border,
     marginBottom: spacing.lg,
-  },
-  block: {
-    marginBottom: spacing.lg,
-  },
-  sectionTitle: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: colors.text,
-    marginBottom: spacing.sm,
-  },
-  body: {
-    fontSize: 16,
-    lineHeight: 24,
-    color: colors.textMuted,
   },
   rawWrap: {
     marginBottom: spacing.lg,

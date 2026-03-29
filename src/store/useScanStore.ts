@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 
+import { buildCategoryExplanations } from '@/src/services/categoryExplanations';
 import { computeFullScore } from '@/src/services/score';
 import type { FullScanResult, ParsedTag } from '@/src/types/tagParse';
 import { computeMissingFields } from '@/src/utils/tagFields';
@@ -17,6 +18,7 @@ export const useScanStore = create<ScanState>((set, get) => ({
     const prev = get().result;
     if (!prev) return;
     const scores = await computeFullScore(parsed);
+    const categoryExplanations = await buildCategoryExplanations(parsed, scores);
     set({
       result: {
         ...prev,
@@ -28,6 +30,7 @@ export const useScanStore = create<ScanState>((set, get) => ({
         countryNote: scores.countryNote,
         brandName: parsed.brand,
         missingFields: computeMissingFields(parsed),
+        categoryExplanations,
       },
     });
   },

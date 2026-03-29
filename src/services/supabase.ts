@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 
+import { normalizeBrandForLookup } from '@/src/utils/brands';
 import { normalizeMaterialKey } from '@/src/utils/materials';
 
 const url = process.env.EXPO_PUBLIC_SUPABASE_URL;
@@ -41,7 +42,7 @@ export type CountryRow = {
 };
 
 export async function fetchBrandByName(name: string): Promise<BrandRow | null> {
-  const normalized = name.trim().toLowerCase();
+  const normalized = normalizeBrandForLookup(name);
   if (!normalized) return null;
   const { data, error } = await supabase
     .from('brands')

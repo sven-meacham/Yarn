@@ -10,6 +10,17 @@ export const colors = {
   scoreHigh: '#2D5A4A',
   scoreMid: '#B8860B',
   scoreLow: '#A85A4A',
+  /** Category explainer accents */
+  explainerBrand: '#4F46E5',
+  explainerBrandBg: '#EEF2FF',
+  explainerMaterials: '#0D9488',
+  explainerMaterialsBg: '#ECFDF9',
+  explainerCountry: '#C2410C',
+  explainerCountryBg: '#FFF7ED',
+  explainerWarn: '#B45309',
+  explainerWarnBg: '#FFFBEB',
+  explainerTag: '#475569',
+  explainerTagBg: '#F1F5F9',
 };
 
 export const spacing = {

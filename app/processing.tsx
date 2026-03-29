@@ -5,6 +5,7 @@ import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 import { PrimaryButton } from '@/src/components/PrimaryButton';
 import { Screen } from '@/src/components/Screen';
 import { processTagImage, processTagLocalFallback } from '@/src/services/processTag';
+import { buildCategoryExplanations } from '@/src/services/categoryExplanations';
 import { computeFullScore } from '@/src/services/score';
 import { useScanStore } from '@/src/store/useScanStore';
 import type { FullScanResult } from '@/src/types/tagParse';
@@ -69,6 +70,7 @@ Made in Vietnam`;
 
         setStatus('Looking up materials…');
         const scores = await computeFullScore(pipeline.parsed);
+        const categoryExplanations = await buildCategoryExplanations(pipeline.parsed, scores);
 
         if (cancelled) return;
 
@@ -84,6 +86,7 @@ Made in Vietnam`;
           brandName: pipeline.parsed.brand,
           tagImageUri: useMock ? null : rawUri,
           missingFields: computeMissingFields(pipeline.parsed),
+          categoryExplanations,
         };
 
         setResult(full);

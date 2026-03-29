@@ -1,3 +1,9 @@
+export type CategoryExplanations = {
+  brand: string;
+  materials: string;
+  country: string;
+};
+
 export type FieldKey = 'brand' | 'materials' | 'country';
 
 export type ParsedMaterial = { name: string; percent: number };
@@ -22,4 +28,6 @@ export type FullScanResult = {
   tagImageUri: string | null;
   /** Which fields were not detected; user can add details to refine scoring. */
   missingFields: Partial<Record<FieldKey, true>>;
+  /** Plain-language breakdown (Supabase-backed when data exists). */
+  categoryExplanations: CategoryExplanations;
 };

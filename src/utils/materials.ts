@@ -8,11 +8,13 @@ const SYNONYMS: Record<string, string> = {
   nylon: 'nylon',
   polyamide: 'nylon',
   wool: 'wool',
+  acrylic: 'acrylic',
   linen: 'linen',
   hemp: 'hemp',
   elastane: 'elastane',
   spandex: 'elastane',
   lycra: 'elastane',
+  tencel: 'lyocell',
 };
 
 export function normalizeMaterialKey(raw: string): string {
